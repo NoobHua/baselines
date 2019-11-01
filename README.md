@@ -1,3 +1,17 @@
+# Readme
+创建该fork的主要目的在于进行方面源码解读，进行代码梳理，以便于之后进行有效快速代码阅读。
+读过的文件将下面list出来。
+
+- a2c算法阅读
+
+
+
+
+
+
+---
+---
+---
 **Status:** Maintenance (expect bug fixes and minor updates)
 
 <img src="data/logo.jpg" width=25% align="right" /> [![Build status](https://travis-ci.org/openai/baselines.svg?branch=master)](https://travis-ci.org/openai/baselines)
