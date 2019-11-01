@@ -196,6 +196,7 @@ def learn(
     # Get the nb of env
     nenvs = env.num_envs
     # 建立policy
+    # 这里的network其实只是network的type名称：比如CNN等
     policy = build_policy(env, network, **network_kwargs)
 
     # Instantiate the model object (that creates step_model and train_model)

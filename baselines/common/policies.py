@@ -12,7 +12,7 @@ import gym
 
 class PolicyWithValue(object):
     """
-    使用共享参数的形式，构造AC类网络。网络输出action和Value，输入的网络结构只包含隐层的结构
+    构造AC类网络。网络输出action和Value，输入的网络结构只包含隐层的结构。输出层由此处来定义。
     Encapsulates fields and methods for RL policy and value function estimation with shared parameters
     """
 
@@ -120,6 +120,7 @@ class PolicyWithValue(object):
         tf_util.load_state(load_path, sess=self.sess)
 
 def build_policy(env, policy_network, value_network=None,  normalize_observations=False, estimate_q=False, **policy_kwargs):
+    # 这里需要实例化具体的网络结构，其实只是实例化，隐层的网络（即对输入的处理）
     if isinstance(policy_network, str):
         network_type = policy_network
         policy_network = get_network_builder(network_type)(**policy_kwargs)
@@ -139,6 +140,7 @@ def build_policy(env, policy_network, value_network=None,  normalize_observation
 
         encoded_x = encode_observation(ob_space, encoded_x)
 
+        # 定义了策略网络，即Actor，但是输出层还没有定义。
         with tf.variable_scope('pi', reuse=tf.AUTO_REUSE):
             policy_latent = policy_network(encoded_x)
             if isinstance(policy_latent, tuple):
@@ -154,6 +156,7 @@ def build_policy(env, policy_network, value_network=None,  normalize_observation
 
         _v_net = value_network
 
+        # 这里定义了critic网络是否要和actor进行参数共享：可以共享，也可以copy（结构一致0。
         if _v_net is None or _v_net == 'shared':
             vf_latent = policy_latent
         else:

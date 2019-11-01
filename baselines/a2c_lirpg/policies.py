@@ -171,6 +171,9 @@ class MlpPolicy(object):
 ########################################################################################################################
 # Intrinsic Reward Augmented Policies
 ########################################################################################################################
+# lirpg 在a2c上的使用，是将actor和critic进行了分离。
+# 而baselines实现的 a2c，actor和critic是在一起的。
+
 class CnnPolicyIntrinsicReward(object):
     def __init__(self, sess, ob_space, ac_space, nbatch, nsteps, reuse=False): #pylint: disable=W0613
         nenv = nbatch // nsteps
