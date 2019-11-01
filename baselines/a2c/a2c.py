@@ -26,6 +26,7 @@ class Model(object):
 
         train():
         - Make the training part (feedforward and retropropagation of gradients)
+        - 包括优化器，train的操作。
 
         save/load():
         - Save load the model
@@ -40,10 +41,12 @@ class Model(object):
 
 
         with tf.variable_scope('a2c_model', reuse=tf.AUTO_REUSE):
-            # step_model is used for sampling
+            # policy文件在/common/policies.py
+
+            # step_model is used for sampling 用于采样的model
             step_model = policy(nenvs, 1, sess)
 
-            # train_model is used to train our network
+            # train_model is used to train our network 用于训练的model
             train_model = policy(nbatch, nsteps, sess)
 
         A = tf.placeholder(train_model.action.dtype, train_model.action.shape)
@@ -51,27 +54,29 @@ class Model(object):
         R = tf.placeholder(tf.float32, [nbatch])
         LR = tf.placeholder(tf.float32, [])
 
-        # Calculate the loss
+    ##################################### Calculate the loss ########################################################
         # Total loss = Policy gradient loss - entropy * entropy coefficient + Value coefficient * value loss
 
-        # Policy loss
+        # Policy loss 即原始的 A2C 中的Actor的loss
         neglogpac = train_model.pd.neglogp(A)
-        # L = A(s,a) * -logpi(a|s)
+        # L = ADV(s,a) * -logpi(a|s)
         pg_loss = tf.reduce_mean(ADV * neglogpac)
 
         # Entropy is used to improve exploration by limiting the premature convergence to suboptimal policy.
+        # Entropy loss 为了加强探索
         entropy = tf.reduce_mean(train_model.pd.entropy())
 
-        # Value loss
+        # Value loss 即原始的 A2C 中的Critic的loss
         vf_loss = losses.mean_squared_error(tf.squeeze(train_model.vf), R)
 
         loss = pg_loss - entropy*ent_coef + vf_loss * vf_coef
 
-        # Update parameters using loss
+    ##################################### Update parameters using loss ################################################
         # 1. Get the model parameters
         params = find_trainable_variables("a2c_model")
 
         # 2. Calculate the gradients
+        # 此时将两种loss直接加到一起进行更新。
         grads = tf.gradients(loss, params)
         if max_grad_norm is not None:
             # Clip the gradients (normalize)
@@ -81,6 +86,7 @@ class Model(object):
         # For instance zip(ABCD, xyza) => Ax, By, Cz, Da
 
         # 3. Make op for one policy and value update step of A2C
+        # 确定训练器
         trainer = tf.train.RMSPropOptimizer(learning_rate=LR, decay=alpha, epsilon=epsilon)
 
         _train = trainer.apply_gradients(grads)
@@ -114,8 +120,10 @@ class Model(object):
         self.save = functools.partial(tf_util.save_variables, sess=sess)
         self.load = functools.partial(tf_util.load_variables, sess=sess)
         tf.global_variables_initializer().run(session=sess)
+    ############################# Update parameters using loss ########################################################
 
 
+# 在main函数中，主要是会调用该函数。
 def learn(
     network,
     env,
@@ -187,9 +195,11 @@ def learn(
 
     # Get the nb of env
     nenvs = env.num_envs
+    # 建立policy
     policy = build_policy(env, network, **network_kwargs)
 
     # Instantiate the model object (that creates step_model and train_model)
+    # 按照上述的model类来进行model实例化。
     model = Model(policy=policy, env=env, nsteps=nsteps, ent_coef=ent_coef, vf_coef=vf_coef,
         max_grad_norm=max_grad_norm, lr=lr, alpha=alpha, epsilon=epsilon, total_timesteps=total_timesteps, lrschedule=lrschedule)
     if load_path is not None:

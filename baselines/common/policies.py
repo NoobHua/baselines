@@ -12,6 +12,7 @@ import gym
 
 class PolicyWithValue(object):
     """
+    使用共享参数的形式，构造AC类网络。网络输出action和Value，输入的网络结构只包含隐层的结构
     Encapsulates fields and methods for RL policy and value function estimation with shared parameters
     """
 
