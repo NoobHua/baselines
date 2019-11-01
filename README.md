@@ -6,7 +6,8 @@
     - baselines/common/policies.py: 主要是构建神经网络：输入state——输出action和value
     - baselines/a2c.py: 构建model（loss函数定义、如何训练），主要对外接口为learn()函数
     - baselines/run.py: 运行代码，从config中实例化policy网络，调用a2c中的learn函数。
-
+    - baselines/common/models.py: 这里面主要是基本的网络结构，包括cnn，lstm等，
+    policies.py使用这里面的结构进行策略网络的构造。
 
 
 
