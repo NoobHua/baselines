@@ -58,8 +58,10 @@ class PdType(object):
 
 class CategoricalPdType(PdType):
     def __init__(self, ncat):
+        # 在离散状态空间下，ncat为action的数量
         self.ncat = ncat
     def pdclass(self):
+        # pdfromflat函数会调用此处
         return CategoricalPd
     def pdfromlatent(self, latent_vector, init_scale=1.0, init_bias=0.0):
         pdparam = _matching_fc(latent_vector, 'pi', self.ncat, init_scale=init_scale, init_bias=init_bias)
@@ -151,6 +153,7 @@ class BernoulliPdType(PdType):
 #         return U.argmax(self.logits - tf.log(-tf.log(u)), axis=-1)
 
 class CategoricalPd(Pd):
+    # 使用pi初始化了该对象——pi：由输入state通过网络输出的各个离散action的概率（并未归一化）
     def __init__(self, logits):
         self.logits = logits
     def flatparam(self):
@@ -197,6 +200,7 @@ class CategoricalPd(Pd):
         p0 = ea0 / z0
         return tf.reduce_sum(p0 * (tf.log(z0) - a0), axis=-1)
     def sample(self):
+        # 随机产生一个和logits的shape一样的narray，均匀分布，[0, 1)
         u = tf.random_uniform(tf.shape(self.logits), dtype=self.logits.dtype)
         return tf.argmax(self.logits - tf.log(-tf.log(u)), axis=-1)
     @classmethod
@@ -280,6 +284,7 @@ def make_pdtype(ac_space):
     if isinstance(ac_space, spaces.Box):
         assert len(ac_space.shape) == 1
         return DiagGaussianPdType(ac_space.shape[0])
+    # A2C 中的离散动作空间
     elif isinstance(ac_space, spaces.Discrete):
         return CategoricalPdType(ac_space.n)
     elif isinstance(ac_space, spaces.MultiDiscrete):

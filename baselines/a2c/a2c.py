@@ -43,6 +43,7 @@ class Model(object):
         with tf.variable_scope('a2c_model', reuse=tf.AUTO_REUSE):
             # policy文件在/common/policies.py
 
+            # 这里关于policy的参数，分别是nbatch, nsteps，是RNN的结构所需要的。
             # step_model is used for sampling 用于采样的model
             step_model = policy(nenvs, 1, sess)
 

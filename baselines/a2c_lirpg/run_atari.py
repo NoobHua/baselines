@@ -3,8 +3,8 @@
 from baselines import logger
 from baselines.common.cmd_util import make_atari_env, atari_arg_parser
 from baselines.common.vec_env.vec_frame_stack import VecFrameStack
-from baselines.a2c.a2c import learn
-from baselines.a2c.policies import CnnPolicy, LstmPolicy, LnLstmPolicy, CnnPolicyIntrinsicReward
+from baselines.a2c_lirpg.a2c import learn
+from baselines.a2c_lirpg.policies import CnnPolicy, LstmPolicy, LnLstmPolicy, CnnPolicyIntrinsicReward
 
 def train(env_id, num_timesteps, seed, policy, lrschedule, num_env,
           v_ex_coef, r_ex_coef, r_in_coef, lr_alpha, lr_beta):

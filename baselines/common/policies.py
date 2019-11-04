@@ -156,7 +156,7 @@ def build_policy(env, policy_network, value_network=None,  normalize_observation
 
         _v_net = value_network
 
-        # 这里定义了critic网络是否要和actor进行参数共享：可以共享，也可以copy（结构一致0。
+        # 这里定义了critic网络是否要和actor进行参数共享：可以共享，也可以copy（结构一致)。
         if _v_net is None or _v_net == 'shared':
             vf_latent = policy_latent
         else:

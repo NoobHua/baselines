@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from baselines.a2c.utils import conv, fc, conv_to_fc, batch_to_seq, seq_to_batch, lstm, lnlstm
+from baselines.a2c_lirpg.utils import conv, fc, conv_to_fc, batch_to_seq, seq_to_batch, lstm, lnlstm
 from baselines.common.distributions import make_pdtype
 
 def nature_cnn(unscaled_images):
@@ -171,8 +171,7 @@ class MlpPolicy(object):
 ########################################################################################################################
 # Intrinsic Reward Augmented Policies
 ########################################################################################################################
-# lirpg 在a2c上的使用，是将actor和critic进行了分离。
-# 而baselines实现的 a2c，actor和critic是在一起的。
+# lirpg 在a2c上的使用，将actor和critic进行了分离。
 
 class CnnPolicyIntrinsicReward(object):
     def __init__(self, sess, ob_space, ac_space, nbatch, nsteps, reuse=False): #pylint: disable=W0613

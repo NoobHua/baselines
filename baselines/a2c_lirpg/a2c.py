@@ -12,9 +12,9 @@ from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.common.atari_wrappers import wrap_deepmind
 from baselines.common import tf_util
 
-from baselines.a2c.utils import discount_with_dones
-from baselines.a2c.utils import Scheduler, make_path, find_trainable_variables
-from baselines.a2c.utils import cat_entropy, mse
+from baselines.a2c_lirpg.utils import discount_with_dones
+from baselines.a2c_lirpg.utils import Scheduler, make_path, find_trainable_variables
+from baselines.a2c_lirpg.utils import cat_entropy, mse
 
 from collections import deque
 
@@ -42,12 +42,17 @@ class Model(object):
         step_model = policy(sess, ob_space, ac_space, nenvs, 1, reuse=False)
         train_model = policy(sess, ob_space, ac_space, nenvs*nsteps, nsteps, reuse=True)
 
+        # 在 a2c 中：
+        # Here we calculate advantage A(s,a) = R + yV(s') - V(s)
+        # rewards = R + yV(s')
         r_mix = r_ex_coef * R_EX + r_in_coef * tf.reduce_sum(train_model.r_in * tf.one_hot(A, nact), axis=1)
         ret_mix = tf.squeeze(tf.matmul(COEF_MAT, tf.reshape(r_mix, [nbatch, 1])), [1]) + DIS_V_MIX_LAST
         adv_mix = ret_mix - V_MIX
 
         neglogpac = train_model.pd.neglogp(A)
+        # A2C 部分的policy loss，即 Actor 的loss
         pg_mix_loss = tf.reduce_mean(adv_mix * neglogpac)
+        # A2C 部分的value loss，即 Critic 的loss
         v_mix_loss = tf.reduce_mean(mse(tf.squeeze(train_model.v_mix), ret_mix))
         entropy = tf.reduce_mean(cat_entropy(train_model.pi))
         policy_loss = pg_mix_loss - ent_coef * entropy + v_mix_coef * v_mix_loss
@@ -65,6 +70,7 @@ class Model(object):
         for grad, rms, var in zip(policy_grads, rmss, policy_params):
             ms = rms + (tf.square(grad) - rms) * (1 - alpha)
             policy_params_new[var.name] = var - LR_ALPHA * grad / tf.sqrt(ms + epsilon)
+        # 新建了一个policy model，作为新的theta'
         policy_new = train_model.policy_new_fn(policy_params_new, ob_space, ac_space, nbatch, nsteps)
 
         neglogpac_new = policy_new.pd.neglogp(A)
