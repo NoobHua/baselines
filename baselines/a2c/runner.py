@@ -54,7 +54,9 @@ class Runner(AbstractEnvRunner):
         mb_masks = mb_dones[:, :-1]
         mb_dones = mb_dones[:, 1:]
 
-
+        # rewards = reward + yV(s')
+        # obs：当前环境给出的state
+        # states：做出action后，由model给出的next s
         if self.gamma > 0.0:
             # Discount/bootstrap off value fn
             last_values = self.model.value(self.obs, S=self.states, M=self.dones).tolist()
